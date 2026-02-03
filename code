@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>One Small Request 😄</title>
+
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background: linear-gradient(135deg, #ffb6c1 0%, #ffe6f0 100%);
+      overflow:hidden;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
+    .box{
+      width:360px;
+      max-width:92vw;
+      padding:26px;
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+      text-align:center;
+    }
+
+    h1{
+      margin:0 0 8px;
+      color:#ff2e63;
+      font-size:20px;
+    }
+
+    p{
+      margin:0 0 14px;
+      color:#333;
+      font-size:15px;
+      line-height:1.4;
+    }
+
+    .btnArea{
+      position:relative;
+      width:100%;
+      height:150px;
+      overflow:hidden;
+      margin-top:8px;
+      touch-action:none;
+    }
+
+    button{
+      border:none;
+      padding:12px 18px;
+      border-radius:12px;
+      font-weight:700;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow:0 6px 14px rgba(0,0,0,0.08);
+      -webkit-tap-highlight-color:transparent;
+      transition:transform .12s ease;
+    }
+
+    #yesBtn{
+      background:#ff2e63;
+      color:white;
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%);
+      z-index:5;
+    }
+
+    #noBtn{
+      background:#f0f0f0;
+      color:#333;
+      position:absolute;
+      left:10px;
+      top:10px;
+      z-index:10;
+    }
+
+    #result{
+      display:none;
+      margin-top:12px;
+      font-size:17px;
+      color:#ff2e63;
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    .footer{
+      margin-top:12px;
+      font-size:13px;
+      color:#666;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h1>Sreya Dhar 💖</h1>
+
+    <p>
+      Will you give me your Instagram ID code from your WhatsApp? 😭📱<br>
+      (Pleaseeee 🥺👉👈)
+    </p>
+
+    <div class="btnArea" id="btnArea">
+      <button id="yesBtn">YES 😍</button>
+      <button id="noBtn">NO 😤</button>
+    </div>
+
+    <div id="result">
+      Yayyy Sreya Dhar!!! 💖🥺<br>
+      Send it to Debjit now 😌📩
+    </div>
+
+    <div class="footer">Try clicking NO 😈</div>
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn  = document.getElementById('noBtn');
+    const btnArea = document.getElementById('btnArea');
+    const result = document.getElementById('result');
+
+    let lastMove = 0;
+    const THROTTLE_MS = 120;
+    const PROXIMITY = 110;
+
+    function moveNoRandom(){
+      const areaRect = btnArea.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const maxX = Math.max(0, areaRect.width - btnRect.width);
+      const maxY = Math.max(0, areaRect.height - btnRect.height);
+
+      const x = Math.floor(Math.random() * (maxX + 1));
+      const y = Math.floor(Math.random() * (maxY + 1));
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+    }
+
+    function escapeNo(){
+      const now = Date.now();
+      if(now - lastMove < THROTTLE_MS) return;
+      lastMove = now;
+      moveNoRandom();
+    }
+
+    // Mouse proximity
+    btnArea.addEventListener("mousemove", (e) => {
+      const areaRect = btnArea.getBoundingClientRect();
+      const noRect = noBtn.getBoundingClientRect();
+
+      const mx = e.clientX - areaRect.left;
+      const my = e.clientY - areaRect.top;
+
+      const cx = (noRect.left - areaRect.left) + noRect.width/2;
+      const cy = (noRect.top  - areaRect.top)  + noRect.height/2;
+
+      const dist = Math.hypot(mx - cx, my - cy);
+      if(dist < PROXIMITY) escapeNo();
+    });
+
+    // Touch proximity
+    btnArea.addEventListener("touchmove", (e) => {
+      if(!e.touches || e.touches.length === 0) return;
+
+      const areaRect = btnArea.getBoundingClientRect();
+      const noRect = noBtn.getBoundingClientRect();
+
+      const t = e.touches[0];
+      const mx = t.clientX - areaRect.left;
+      const my = t.clientY - areaRect.top;
+
+      const cx = (noRect.left - areaRect.left) + noRect.width/2;
+      const cy = (noRect.top  - areaRect.top)  + noRect.height/2;
+
+      const dist = Math.hypot(mx - cx, my - cy);
+      if(dist < PROXIMITY){
+        e.preventDefault();
+        escapeNo();
+      }
+    }, {passive:false});
+
+    // If she taps NO directly
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      escapeNo();
+    });
+
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      escapeNo();
+    }, {passive:false});
+
+    // YES click
+    yesBtn.addEventListener("click", () => {
+      btnArea.style.display = "none";
+      result.style.display = "block";
+    });
+
+    // Init
+    setTimeout(moveNoRandom, 80);
+    window.addEventListener("resize", () => setTimeout(moveNoRandom, 120));
+  </script>
+
+</body>
+</html>
